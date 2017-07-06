@@ -19,9 +19,6 @@ public class ImageReaderTest {
 
 	@Test
 	public void testSinglePageTiff() {
-		/* 
-		 * Reference: http://stackoverflow.com/questions/17770071/splitting-a-multipage-tiff-image-into-individual-images-java
-		 */
 		try {
 			String pathToImage = "src/data/tiff/CCITT_1.TIF";
 			ImageInputStream is = ImageIO.createImageInputStream(new File(pathToImage));
