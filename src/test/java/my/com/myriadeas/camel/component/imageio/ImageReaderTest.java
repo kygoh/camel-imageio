@@ -28,15 +28,30 @@ public class ImageReaderTest {
         assertEquals(22, tiffFiles.length);
         
         for(File tiffFile: tiffFiles) {
-            testReadFile(tiffFile);
+            testReadImageFile(tiffFile);
         }
     }
     
-    private void testReadFile(File tiffFile) {
+    @Test
+    public void testReadTestImagesFromW3C() {
+        String pathToTiffDirectory = "src/data/w3c";
+        File path = new File(pathToTiffDirectory);
+        assertTrue(path.isDirectory());
+        
+        File[] files = path.listFiles();
+        assertNotNull(files);
+        assertEquals(17, files.length);
+        
+        for(File file: files) {
+            testReadImageFile(file);
+        }
+    }
+    
+    private void testReadImageFile(File file) {
         ImageInputStream is = null;
         ImageReader reader = null;
         try {
-            is = ImageIO.createImageInputStream(tiffFile);
+            is = ImageIO.createImageInputStream(file);
             assertNotNull(is);
             assertTrue(is.length() > 0);
             
@@ -50,7 +65,7 @@ public class ImageReaderTest {
             int nbPages = reader.getNumImages(true);
             assertTrue(nbPages > 0);
 
-            System.out.println(String.format("%s has %d page(s)", tiffFile, nbPages));
+            System.out.println(String.format("%s has %d page(s)", file, nbPages));
             for(int page=0; page < nbPages; page++) {
                 BufferedImage image = reader.read(page);
                 System.out.println(String.format("%dx%d @ %d bit(s)", image.getWidth(), image.getHeight(), image.getColorModel().getPixelSize()));
