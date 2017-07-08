@@ -17,36 +17,61 @@ import org.junit.Test;
 
 public class ImageReaderTest {
 
-	@Test
-	public void testSinglePageTiff() {
-		try {
-			String pathToImage = "src/data/tiff/CCITT_1.TIF";
-			ImageInputStream is = ImageIO.createImageInputStream(new File(pathToImage));
-			if (is == null || is.length() == 0){
-				fail();
-			}
-			Iterator<ImageReader> iterator = ImageIO.getImageReaders(is);
-			if (iterator == null || !iterator.hasNext()) {
-				throw new IOException("Image file format not supported by ImageIO: " + pathToImage);
-			}
-			// We are just looking for the first reader compatible:
-			ImageReader reader = (ImageReader) iterator.next();
-			iterator = null;
-			reader.setInput(is);
-			int nbPages = reader.getNumImages(true);
-			assertEquals(1, nbPages);
+    @Test
+    public void testReadTiffFromFolder() {
+        String pathToTiffDirectory = "src/data/tiff";
+        File path = new File(pathToTiffDirectory);
+        assertTrue(path.isDirectory());
+        
+        File[] tiffFiles = path.listFiles();
+        assertNotNull(tiffFiles);
+        assertEquals(22, tiffFiles.length);
+        
+        for(File tiffFile: tiffFiles) {
+            testReadFile(tiffFile);
+        }
+    }
+    
+    private void testReadFile(File tiffFile) {
+        ImageInputStream is = null;
+        ImageReader reader = null;
+        try {
+            is = ImageIO.createImageInputStream(tiffFile);
+            assertNotNull(is);
+            assertTrue(is.length() > 0);
+            
+            Iterator<ImageReader> iterator = ImageIO.getImageReaders(is);
+            assertNotNull(iterator);
+            assertTrue(iterator.hasNext());
+            
+            reader = (ImageReader) iterator.next();
+            iterator = null;
+            reader.setInput(is);
+            int nbPages = reader.getNumImages(true);
+            assertTrue(nbPages > 0);
 
-			for(int page=0; page < nbPages; page++) {
-				BufferedImage image = reader.read(page);
-				System.out.println(image.getWidth() + " x " + image.getHeight());
-			}
-			reader.dispose();
-			is.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+            System.out.println(String.format("%s has %d page(s)", tiffFile, nbPages));
+            for(int page=0; page < nbPages; page++) {
+                BufferedImage image = reader.read(page);
+                System.out.println(String.format("%dx%d @ %d bit(s)", image.getWidth(), image.getHeight(), image.getColorModel().getPixelSize()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail();
+        } finally {
+            try {
+                if (reader != null) {
+                    reader.dispose();
+                }
+                if (is != null) {
+                    is.close();
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+    }
 
 	@Test
 	public void testMultipageTiff() {
@@ -61,7 +86,7 @@ public class ImageReaderTest {
 			}
 			Iterator<ImageReader> iterator = ImageIO.getImageReaders(is);
 			if (iterator == null || !iterator.hasNext()) {
-				throw new IOException("Image file format not supported by ImageIO: " + pathToImage);
+				fail();
 			}
 			// We are just looking for the first reader compatible:
 			ImageReader reader = (ImageReader) iterator.next();
